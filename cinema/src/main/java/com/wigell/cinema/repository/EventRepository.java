@@ -6,5 +6,7 @@ import com.wigell.cinema.entity.Event;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>{
+
+    void deleteAllByMovieId(Long id);
     
 }

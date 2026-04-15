@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.springframework.stereotype.Service;
 
 import com.wigell.cinema.entity.Movie;
+import com.wigell.cinema.repository.EventRepository;
 import com.wigell.cinema.repository.MovieRepository;
 
 @Service
@@ -13,9 +14,11 @@ public class MovieService {
     private static final Logger logger = Logger.getLogger(MovieService.class.getName());
 
     private final MovieRepository movieRepository;
+    private final EventRepository eventRepository;
 
-    public MovieService(MovieRepository repository){
+    public MovieService(MovieRepository repository, EventRepository eventRepository){
         this.movieRepository = repository;
+        this.eventRepository = eventRepository;
     }
 
     public List<Movie> getAllMovies(){
@@ -34,6 +37,7 @@ public class MovieService {
     }
 
     public void deleteMovie(Long id) {
+        eventRepository.deleteAllByMovieId(id);
         Movie movie = getMovieById(id);
         movieRepository.deleteById(id);
         logger.info("Admin deleted movie" + movie.getTitle());

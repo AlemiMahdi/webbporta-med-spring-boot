@@ -10,6 +10,7 @@ import com.wigell.cinema.dto.EventRequest;
 import com.wigell.cinema.entity.Event;
 import com.wigell.cinema.entity.Movie;
 import com.wigell.cinema.entity.Room;
+import com.wigell.cinema.repository.BookingRepository;
 import com.wigell.cinema.repository.EventRepository;
 import com.wigell.cinema.repository.MovieRepository;
 import com.wigell.cinema.repository.RoomRepository;
@@ -21,10 +22,13 @@ public class EventService {
     private final EventRepository eventRepository;
     private final RoomRepository roomRepository;
     private final MovieRepository movieRepository;
-    public EventService(EventRepository eventRepository, MovieRepository movieRepository, RoomRepository roomRepository){
+    private final BookingRepository bookingRepository;
+
+    public EventService(EventRepository eventRepository, MovieRepository movieRepository, RoomRepository roomRepository, BookingRepository bookingRepository){
         this.eventRepository = eventRepository;
         this.movieRepository = movieRepository;
         this.roomRepository = roomRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<Event> getAllEvents(){
@@ -56,14 +60,24 @@ public class EventService {
     logger.info("Admin added event: " + saved.getMovie().getTitle());
 
     return saved;
-}
+    }
 
     public void deleteEvent(Long id){
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found" + id));
-        eventRepository.delete(event);
-        logger.info("Admin deleted event for movie" + event.getMovie().getTitle());
-    }
+
+    Event event = eventRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Event not found: " + id));
+
+        bookingRepository.deleteAll(
+        bookingRepository.findAll()
+            .stream()
+            .filter(b -> b.getEvent().getId().equals(id))
+            .toList()
+    );
+
+    eventRepository.delete(event);
+
+    logger.info("Deleted event with id: " + id);
+}
 
 
 }
