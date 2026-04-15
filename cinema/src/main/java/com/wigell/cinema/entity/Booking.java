@@ -2,6 +2,8 @@ package com.wigell.cinema.entity;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,10 +21,12 @@ public class Booking {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "event_id")
     private Event event;
 
@@ -32,7 +36,7 @@ public class Booking {
     private LocalDate date;
     private String equipment;
 
-    protected Booking(){}
+    public Booking(){}
 
     
     public Long getId() {

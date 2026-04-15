@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.wigell.cinema.dto.TicketRequest;
 import com.wigell.cinema.entity.Booking;
 import com.wigell.cinema.entity.Customer;
 import com.wigell.cinema.entity.Ticket;
@@ -36,19 +37,25 @@ public class TicketService {
                 .collect(Collectors.toList());
     }
 
-    public Ticket addTicket(Ticket ticket){
-        Customer customer = customerRepository.findById(ticket.getCustomer().getId())
-                .orElseThrow(() -> new RuntimeException("Customer was not found"));
-        Booking booking = bookingRepository.findById(ticket.getBooking().getId())
-                .orElseThrow(() -> new RuntimeException("Booking was not found"));
-        
-        ticket.setCustomer(customer);
-        ticket.setBooking(booking);
-        ticket.setPriceSek(TICKET_PRICE_SEK);
-        ticket.setPriceUsd(TICKET_PRICE_SEK * USD_RATE);
+    public Ticket addTicket(TicketRequest request) {
 
-        Ticket saved = ticketRepository.save(ticket);
-        logger.info("Customer bought ticket with id: " + saved.getId());
-        return saved;
-    }
+    Customer customer = customerRepository.findById(request.getCustomerId())
+            .orElseThrow(() -> new RuntimeException("Customer was not found"));
+
+    Booking booking = bookingRepository.findById(request.getBookingId())
+            .orElseThrow(() -> new RuntimeException("Booking was not found"));
+
+    Ticket ticket = new Ticket();
+    ticket.setCustomer(customer);
+    ticket.setBooking(booking);
+
+    ticket.setPriceSek(TICKET_PRICE_SEK);
+    ticket.setPriceUsd(TICKET_PRICE_SEK * USD_RATE);
+
+    Ticket saved = ticketRepository.save(ticket);
+
+    logger.info("Ticket created with id: " + saved.getId());
+
+    return saved;
+}
 }

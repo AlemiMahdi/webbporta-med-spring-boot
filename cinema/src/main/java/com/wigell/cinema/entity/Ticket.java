@@ -1,5 +1,7 @@
 package com.wigell.cinema.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,17 +19,19 @@ public class Ticket{
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
     private double priceSek;
     private double priceUsd;
 
-    protected Ticket(){}
+    public Ticket(){}
     
     public Long getId() {
         return id;

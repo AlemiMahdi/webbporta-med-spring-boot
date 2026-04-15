@@ -2,6 +2,8 @@ package com.wigell.cinema.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,16 +21,18 @@ public class Event {
     private Long id;
 
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "room_id")
     private Room room;
 
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
     private LocalDateTime dateTime;
 
-    protected Event(){}
+    public Event(){}
 
     public Long getId() {
         return id;

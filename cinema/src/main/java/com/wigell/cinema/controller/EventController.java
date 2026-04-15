@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.wigell.cinema.dto.EventRequest;
 import com.wigell.cinema.entity.Event;
 import com.wigell.cinema.service.EventService;
 
@@ -41,15 +42,18 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Event> addEvent(@RequestBody Event event){
-        Event saved = eventService.addEvent(event);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(saved.getId())
-                .toUri();
-        return ResponseEntity.created(location).body(saved);
-    }
+public ResponseEntity<Event> addEvent(@RequestBody EventRequest request){
+
+    Event saved = eventService.addEvent(request);
+
+    URI location = ServletUriComponentsBuilder
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(saved.getId())
+            .toUri();
+
+    return ResponseEntity.created(location).body(saved);
+}
 
     @DeleteMapping("/{screeningId}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long screeningId){

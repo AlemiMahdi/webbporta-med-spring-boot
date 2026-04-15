@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.wigell.cinema.dto.BookingDTO;
 import com.wigell.cinema.entity.Booking;
 import com.wigell.cinema.entity.Customer;
 import com.wigell.cinema.entity.Event;
@@ -15,6 +16,7 @@ import com.wigell.cinema.repository.EventRepository;
 
 @Service
 public class BookingService {
+
     private static final Logger logger = Logger.getLogger(BookingService.class.getName());
 
     private static final double USD_RATE = 0.095;
@@ -24,52 +26,67 @@ public class BookingService {
     private final CustomerRepository customerRepository;
     private final EventRepository eventRepository;
 
-    public BookingService( BookingRepository bookingRepository, CustomerRepository customerRepository, EventRepository eventRepository){
+    public BookingService(BookingRepository bookingRepository,
+                          CustomerRepository customerRepository,
+                          EventRepository eventRepository) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.eventRepository = eventRepository;
     }
 
-    public List<Booking> getBookingsByCustomerId(Long customerId){
+    public List<Booking> getBookingsByCustomerId(Long customerId) {
         return bookingRepository.findAll().stream()
                 .filter(b -> b.getCustomer().getId().equals(customerId))
                 .collect(Collectors.toList());
     }
 
-    public Booking addBooking(Booking booking){
-        Customer customer = customerRepository.findById(booking.getCustomer().getId())
-                .orElseThrow(() -> new RuntimeException("Customer was not found"));
-        Event event = eventRepository.findById(booking.getEvent().getId())
-                .orElseThrow(() -> new RuntimeException("Even not fouind"));
-        
+    public Booking addBooking(BookingDTO request) {
+
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Event event = eventRepository.findById(request.getEventId())
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        Booking booking = new Booking();
         booking.setCustomer(customer);
         booking.setEvent(event);
+        booking.setNumberOfGuests(request.getNumberOfGuests());
+        booking.setDate(request.getDate());
+        booking.setEquipment(request.getEquipment());
 
-        double priceSek = booking.getNumberOfGuests() * PRICE_PER_GUEST;
+        double priceSek = request.getNumberOfGuests() * PRICE_PER_GUEST;
         booking.setTotalPriceSek(priceSek);
         booking.setTotalPriceUsd(priceSek * USD_RATE);
 
         Booking saved = bookingRepository.save(booking);
-        logger.info("Customer created booking with id: " + saved.getId());
+
+        logger.info("Booking created with id: " + saved.getId());
+
         return saved;
     }
 
-    public Booking updateBooking(Long id, Booking updatedBooking){
-        Booking existing = bookingRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Booking was not found" + id));
+    public Booking updateBooking(Long id, BookingDTO request) {
 
-        if (updatedBooking.getDate() != null) {
-            existing.setDate(updatedBooking.getDate());
+        Booking existing = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found: " + id));
+
+        if (request.getDate() != null) {
+            existing.setDate(request.getDate());
         }
 
-        if (updatedBooking.getEquipment() != null) {
-            existing.setEquipment(updatedBooking.getEquipment());
+        if (request.getEquipment() != null) {
+            existing.setEquipment(request.getEquipment());
+        }
+
+        if (request.getNumberOfGuests() > 0) {
+            existing.setNumberOfGuests(request.getNumberOfGuests());
         }
 
         Booking saved = bookingRepository.save(existing);
-        logger.info("Admin updated booking" + saved.getId());
+
+        logger.info("Booking updated with id: " + saved.getId());
+
         return saved;
     }
-
-
 }

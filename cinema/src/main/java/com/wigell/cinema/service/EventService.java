@@ -5,16 +5,26 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+
+import com.wigell.cinema.dto.EventRequest;
 import com.wigell.cinema.entity.Event;
+import com.wigell.cinema.entity.Movie;
+import com.wigell.cinema.entity.Room;
 import com.wigell.cinema.repository.EventRepository;
+import com.wigell.cinema.repository.MovieRepository;
+import com.wigell.cinema.repository.RoomRepository;
 
 @Service
 public class EventService {
     private static final Logger logger = Logger.getLogger(EventService.class.getName());
 
     private final EventRepository eventRepository;
-    public EventService(EventRepository eventRepository){
+    private final RoomRepository roomRepository;
+    private final MovieRepository movieRepository;
+    public EventService(EventRepository eventRepository, MovieRepository movieRepository, RoomRepository roomRepository){
         this.eventRepository = eventRepository;
+        this.movieRepository = movieRepository;
+        this.roomRepository = roomRepository;
     }
 
     public List<Event> getAllEvents(){
@@ -28,11 +38,25 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public Event addEvent(Event event) {
-        Event saved = eventRepository.save(event);
-        logger.info("Admin added event" + saved.getMovie().getTitle());
-        return saved;
-    }
+    public Event addEvent(EventRequest request) {
+
+    Movie movie = movieRepository.findById(request.getMovieId())
+            .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+    Room room = roomRepository.findById(request.getRoomId())
+            .orElseThrow(() -> new RuntimeException("Room not found"));
+
+    Event event = new Event();
+    event.setMovie(movie);
+    event.setRoom(room);
+    event.setDateTime(request.getDateTime());
+
+    Event saved = eventRepository.save(event);
+
+    logger.info("Admin added event: " + saved.getMovie().getTitle());
+
+    return saved;
+}
 
     public void deleteEvent(Long id){
         Event event = eventRepository.findById(id)
