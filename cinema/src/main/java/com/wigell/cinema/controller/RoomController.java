@@ -31,8 +31,8 @@ public class RoomController {
     }
 
     @GetMapping("/{roomId}")
-    public ResponseEntity<Room> getRoomById(@PathVariable Long id){
-        return ResponseEntity.ok(roomService.getRoomById(id));
+    public ResponseEntity<Room> getRoomById(@PathVariable Long roomId){
+        return ResponseEntity.ok(roomService.getRoomById(roomId));
     }
 
     @PostMapping
@@ -47,8 +47,8 @@ public class RoomController {
     }
 
     @PutMapping("/{roomId}")
-    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room room){
-        Room updated = roomService.updateRoom(id, room);
+    public ResponseEntity<Room> updateRoom(@PathVariable Long roomId, @RequestBody Room room){
+        Room updated = roomService.updateRoom(roomId, room);
         return ResponseEntity.ok(updated);
     }
 }
